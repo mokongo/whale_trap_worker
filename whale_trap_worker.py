@@ -90,6 +90,7 @@ def generate_chart(symbol):
         
     def run_whale_trap_worker():
         print("✅ Worker script is running fine...")
+        pass
 
 
 
