@@ -83,6 +83,7 @@ def generate_chart(symbol):
     def run_whale_trap_worker():
         # All your worker logic goes here
         # for example: fetch data, calculate indicators, send alerts
+        print("✅ Worker Data script is running fine...")
     pass
     
    # def run_whale_trap_worker():
