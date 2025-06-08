@@ -87,6 +87,9 @@ def generate_chart(symbol):
     
     def run_whale_trap_worker():
         print("🚀 Worker environment is running successfully!")
+        
+    def run_whale_trap_worker():
+        print("✅ Worker script is running fine...")
 
 
 
