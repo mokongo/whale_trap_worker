@@ -137,7 +137,7 @@ def run_whale_trap_worker():
             analyze_symbol(symbol)
             time.sleep(29)  # Delay to avoid throttling
         print("🔁 Cycle complete. Sleeping 10 minutes before next scan...")
-        time.sleep(600)
+        time.sleep(15)
 
 if __name__ == "__main__":
     run_whale_trap_worker()
