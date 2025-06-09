@@ -120,7 +120,7 @@ def run_whale_trap_worker():
     print("✅ Whale Trap Worker started...")
     for symbol in symbols:
         analyze_symbol(symbol)
-        time.sleep(1)  # short pause to avoid API overload
+        time.sleep(5)  # short pause to avoid API overload
 
 if __name__ == "__main__":
     run_whale_trap_worker()
