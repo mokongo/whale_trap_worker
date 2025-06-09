@@ -123,8 +123,7 @@ def analyze_symbol(symbol):
         signal = f"🚨 Whale trap signal detected on {symbol} at {last_close:.5f}"
         print(signal)
         with open("trap_log.txt", "a") as f:
-            f.write(f"{df['time'].iloc[-1]} - {signal}
-")
+            f.write(f"{df['time'].iloc[-1]} - {signal}\n")
         send_telegram_alert(signal)
     else:
         print("⚠️ No trap signal this cycle.")
