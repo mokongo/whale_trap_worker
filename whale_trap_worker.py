@@ -1,4 +1,4 @@
-# whale_trap_worker.py (Updated to use Binance Python Client)
+# whale_trap_worker.py
 import os
 import time
 import requests
@@ -9,7 +9,7 @@ from binance.client import Client
 
 # === TELEGRAM SETUP ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Updated to full channel ID format
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Replace with your channel ID
 
 # === BINANCE API SETUP ===
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
@@ -41,8 +41,7 @@ symbols = get_perpetual_usdt_symbols()
 
 def fetch_klines(symbol, interval="15m", limit=100):
     try:
-        klines = client.futures_klines(symbol=symbol, interval=interval, limit=limit)
-        return klines
+        return client.futures_klines(symbol=symbol, interval=interval, limit=limit)
     except Exception as e:
         print(f"❌ Kline fetch error for {symbol}: {e}")
         return None
@@ -60,9 +59,9 @@ def analyze_symbol(symbol):
 
     for col in ['open', 'high', 'low', 'close', 'volume']:
         df[col] = df[col].astype(float)
-
     df['time'] = pd.to_datetime(df['timestamp'], unit='ms')
 
+    # === TECHNICAL INDICATORS ===
     df['rsi'] = ta.momentum.RSIIndicator(df['close'], window=14).rsi()
     df['obv'] = ta.volume.OnBalanceVolumeIndicator(close=df['close'], volume=df['volume']).on_balance_volume()
     df['atr'] = ta.volatility.AverageTrueRange(high=df['high'], low=df['low'], close=df['close'], window=14).average_true_range()
@@ -86,7 +85,7 @@ def analyze_symbol(symbol):
         print(signal)
         send_telegram_alert(signal)
     else:
-        print("⚠️ No signal.")
+        print(f"⚠️ No trap signal for {symbol}.")
 
 def run_whale_trap_worker():
     print("✅ Whale Trap Worker started (Binance Client mode)...")
@@ -94,9 +93,9 @@ def run_whale_trap_worker():
     while True:
         for symbol in symbols:
             analyze_symbol(symbol)
-            time.sleep(29)
+            time.sleep(29)  # Delay between coins
         print("🔁 Cycle complete. Sleeping 10 minutes...")
-        time.sleep(600)
+        time.sleep(20)
 
 if __name__ == "__main__":
     run_whale_trap_worker()
