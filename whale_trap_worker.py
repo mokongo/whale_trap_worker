@@ -1,15 +1,20 @@
-# whale_trap_worker.py (HTTP version without Binance SDK)
+# whale_trap_worker.py (Updated to use Binance Python Client)
 import os
 import time
-import random
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import ta
+from binance.client import Client
 
 # === TELEGRAM SETUP ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "mokongo")  # Updated to handle username as fallback
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Updated to full channel ID format
+
+# === BINANCE API SETUP ===
+BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
+BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET")
+client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
 def send_telegram_alert(message):
     if TELEGRAM_TOKEN and CHAT_ID:
@@ -22,12 +27,10 @@ def send_telegram_alert(message):
             print(f"❌ Telegram error: {e}")
 
 def get_perpetual_usdt_symbols():
-    url = "https://fapi.binance.com/fapi/v1/exchangeInfo"
     try:
-        response = requests.get(url)
-        data = response.json()
+        exchange_info = client.futures_exchange_info()
         return [
-            s["symbol"] for s in data["symbols"]
+            s["symbol"] for s in exchange_info["symbols"]
             if s["contractType"] == "PERPETUAL" and s["quoteAsset"] == "USDT"
         ]
     except Exception as e:
@@ -37,12 +40,9 @@ def get_perpetual_usdt_symbols():
 symbols = get_perpetual_usdt_symbols()
 
 def fetch_klines(symbol, interval="15m", limit=100):
-    url = f"https://api.binance.com/api/v3/klines"
-    params = {"symbol": symbol, "interval": interval, "limit": limit}
     try:
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        return response.json()
+        klines = client.futures_klines(symbol=symbol, interval=interval, limit=limit)
+        return klines
     except Exception as e:
         print(f"❌ Kline fetch error for {symbol}: {e}")
         return None
@@ -89,8 +89,8 @@ def analyze_symbol(symbol):
         print("⚠️ No signal.")
 
 def run_whale_trap_worker():
-    print("✅ Whale Trap Worker started (HTTP mode)...")
-    send_telegram_alert("✅ Whale Trap Worker started (HTTP mode)")
+    print("✅ Whale Trap Worker started (Binance Client mode)...")
+    send_telegram_alert("✅ Whale Trap Worker started (Binance Client mode)")
     while True:
         for symbol in symbols:
             analyze_symbol(symbol)
