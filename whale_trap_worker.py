@@ -20,7 +20,7 @@ def get_perpetual_usdt_symbols():
         if s["contractType"] == "PERPETUAL" and s["quoteAsset"] == "USDT" and s["status"] == "TRADING"
     ]
 
-symbols = get_perpetual_usdt_symbols()
+symbols = symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]()
 
 def fetch_binance_klines(symbol, interval="15m", limit=100):
     url = f"{BINANCE_BASE_URL}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
