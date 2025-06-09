@@ -102,7 +102,7 @@ def run_whale_trap_worker():
             analyze_symbol(symbol)
             time.sleep(29)
         print("🔁 Cycle complete. Sleeping 10 minutes...")
-        time.sleep(600)
+        time.sleep(5)
 
 if __name__ == "__main__":
     run_whale_trap_worker()
