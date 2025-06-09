@@ -16,6 +16,12 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 def send_telegram_alert(message):
+        # Test Telegram connectivity
+    if TELEGRAM_TOKEN and CHAT_ID:
+        send_telegram_alert("✅ Whale Trap bot is live and listening...")
+   else:
+        print("⚠️ Telegram token or chat ID not set in environment.")
+
     if TELEGRAM_TOKEN and CHAT_ID:
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
         payload = {"chat_id": CHAT_ID, "text": message}
