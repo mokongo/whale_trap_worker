@@ -109,9 +109,8 @@ def analyze_symbol(symbol):
         signal = f"🚨 TEST SIGNAL on {symbol}"
         print(signal)
         with open("trap_log.txt", "a") as f:
-           # f.write(f"{df['time'].iloc[-1]} - {signal}
-")
-            f.write(f"{df['time'].iloc[-1]} - {signal}\n")
+           # f.write(f"{df['time'].iloc[-1]} - {signal}")
+             f.write(f"{df['time'].iloc[-1]} - {signal}\n")
         send_telegram_alert(signal)
         return
 
