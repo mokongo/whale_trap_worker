@@ -1,4 +1,5 @@
 pandas
 matplotlib
 ta
+python-dotenv
 requests
