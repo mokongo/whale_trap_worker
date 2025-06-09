@@ -28,7 +28,7 @@ def send_telegram_alert(message):
 
 # Temporarily hardcode a few high-liquidity symbols for stability
 def get_perpetual_usdt_symbols():
-    return ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    return ["BTCUSDT"]
 
 symbols = get_perpetual_usdt_symbols()
 
