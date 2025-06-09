@@ -1,4 +1,4 @@
-# whale_trap_worker.py
+# whale_trap_worker.py (Updated with retry + safety checks)
 import os
 import time
 import requests
@@ -9,7 +9,7 @@ from binance.client import Client
 
 # === TELEGRAM SETUP ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Replace with your channel ID
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Updated to full channel ID format
 
 # === BINANCE API SETUP ===
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
@@ -40,11 +40,17 @@ def get_perpetual_usdt_symbols():
 symbols = get_perpetual_usdt_symbols()
 
 def fetch_klines(symbol, interval="15m", limit=100):
-    try:
-        return client.futures_klines(symbol=symbol, interval=interval, limit=limit)
-    except Exception as e:
-        print(f"❌ Kline fetch error for {symbol}: {e}")
-        return None
+    retries = 3
+    for attempt in range(retries):
+        try:
+            klines = client.futures_klines(symbol=symbol, interval=interval, limit=limit)
+            if klines and len(klines) >= 30:
+                return klines
+        except Exception as e:
+            print(f"❌ Attempt {attempt+1}: Kline fetch error for {symbol}: {e}")
+            time.sleep(2)
+    print(f"🚫 All attempts failed for {symbol}")
+    return None
 
 def analyze_symbol(symbol):
     print(f"📊 Analyzing {symbol} ...")
@@ -59,16 +65,19 @@ def analyze_symbol(symbol):
 
     for col in ['open', 'high', 'low', 'close', 'volume']:
         df[col] = df[col].astype(float)
+
+    if df.shape[0] < 30:
+        print(f"⚠️ Not enough data to analyze {symbol}")
+        return
+
     df['time'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-    # === TECHNICAL INDICATORS ===
     df['rsi'] = ta.momentum.RSIIndicator(df['close'], window=14).rsi()
     df['obv'] = ta.volume.OnBalanceVolumeIndicator(close=df['close'], volume=df['volume']).on_balance_volume()
     df['atr'] = ta.volatility.AverageTrueRange(high=df['high'], low=df['low'], close=df['close'], window=14).average_true_range()
     df['ema20'] = ta.trend.ema_indicator(df['close'], window=20)
     df['ema50'] = ta.trend.ema_indicator(df['close'], window=50)
 
-    # === SIGNAL CONDITIONS ===
     last_rsi, prev_rsi = df['rsi'].iloc[-1], df['rsi'].iloc[-2]
     last_close = df['close'].iloc[-1]
     last_obv, prev_obv = df['obv'].iloc[-1], df['obv'].iloc[-2]
@@ -85,7 +94,7 @@ def analyze_symbol(symbol):
         print(signal)
         send_telegram_alert(signal)
     else:
-        print(f"⚠️ No trap signal for {symbol}.")
+        print("⚠️ No signal.")
 
 def run_whale_trap_worker():
     print("✅ Whale Trap Worker started (Binance Client mode)...")
@@ -93,9 +102,9 @@ def run_whale_trap_worker():
     while True:
         for symbol in symbols:
             analyze_symbol(symbol)
-            time.sleep(29)  # Delay between coins
+            time.sleep(29)
         print("🔁 Cycle complete. Sleeping 10 minutes...")
-        time.sleep(20)
+        time.sleep(60)
 
 if __name__ == "__main__":
     run_whale_trap_worker()
