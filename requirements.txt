@@ -5,4 +5,5 @@ python-binance
 python-dotenv
 streamlit
 python-telegram-bot
+uv
 requests
