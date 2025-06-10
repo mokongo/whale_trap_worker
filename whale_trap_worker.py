@@ -1,4 +1,5 @@
 
+
 # whale_trap_worker.py (Updated with Binance client version fallback and tighter filters)
 import os
 import time
@@ -121,3 +122,10 @@ def run_whale_trap_worker():
 
 if __name__ == "__main__":
     run_whale_trap_worker()
+def get_telegram_updates():
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
+        response = requests.get(url)
+        print("📩 Telegram Updates:", response.json())
+    except Exception as e:
+        print(f"❌ Failed to fetch updates: {e}")
