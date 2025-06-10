@@ -1,6 +1,7 @@
 pandas
 matplotlib
 ta
+flask
 python-dotenv
 streamlit
 python-telegram-bot
