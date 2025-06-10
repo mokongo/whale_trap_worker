@@ -3,4 +3,6 @@ matplotlib
 ta
 python-binance
 python-dotenv
+streamlit
+python-telegram-bot
 requests
