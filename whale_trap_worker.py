@@ -9,7 +9,7 @@ import ta
 
 # === TELEGRAM SETUP ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Updated to full channel ID format
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5929815952")  # Updated to full channel ID format
 
 # === BINANCE API SETUP ===
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
