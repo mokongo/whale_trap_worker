@@ -1,5 +1,6 @@
 pandas
 matplotlib
 ta
+python-binance
 python-dotenv
 requests
