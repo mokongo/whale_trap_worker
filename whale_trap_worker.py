@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import ta
-#from binance.client import Client
+from binance.client import Client
 
 # === TELEGRAM SETUP ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -14,7 +14,7 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5929815952")  # Updated to full channel
 # === BINANCE API SETUP ===
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
 BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET")
-#client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
+client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
 def send_telegram_alert(message):
     if TELEGRAM_TOKEN and CHAT_ID:
