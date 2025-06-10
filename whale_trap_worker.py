@@ -1,21 +1,41 @@
-# whale_trap_worker.py (Updated with retry + safety checks)
+
+# whale_trap_worker.py (Updated with Binance client version fallback and tighter filters)
 import os
 import time
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import ta
-from binance.client import Client
+import re
 
 # === TELEGRAM SETUP ===
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5929815952")  # Updated to full channel ID format
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")
 
-# === BINANCE API SETUP ===
-BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
-BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET")
-client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
+# === SYMBOL SETUP ===
+def get_perpetual_usdt_symbols():
+    try:
+        url = "https://data.binance.com/fapi/v1/exchangeInfo"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        raw_symbols = [
+            s["symbol"] for s in data["symbols"]
+            if s.get("contractType") == "PERPETUAL" and s.get("quoteAsset") == "USDT"
+        ]
+        filtered = [s for s in raw_symbols if re.fullmatch(r"[A-Z]{4,20}USDT", s)]
+        if not filtered:
+            print("⚠️ No valid symbols found, using fallback list.")
+            return ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+        return filtered
+    except Exception as e:
+        print(f"❌ Error getting symbols: {e}")
+        return ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
 
+symbols = get_perpetual_usdt_symbols()
+
+# === TELEGRAM ALERT ===
 def send_telegram_alert(message):
     if TELEGRAM_TOKEN and CHAT_ID:
         url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -26,32 +46,24 @@ def send_telegram_alert(message):
         except Exception as e:
             print(f"❌ Telegram error: {e}")
 
-def get_perpetual_usdt_symbols():
-    try:
-        exchange_info = client.futures_exchange_info()
-        return [
-            s["symbol"] for s in exchange_info["symbols"]
-            if s["contractType"] == "PERPETUAL" and s["quoteAsset"] == "USDT"
-        ]
-    except Exception as e:
-        print(f"❌ Error getting symbols: {e}")
-        return ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
-
-symbols = get_perpetual_usdt_symbols()
-
+# === FETCH KLINES ===
 def fetch_klines(symbol, interval="15m", limit=100):
     retries = 3
     for attempt in range(retries):
         try:
-            klines = client.futures_klines(symbol=symbol, interval=interval, limit=limit)
-            if klines and len(klines) >= 30:
-                return klines
+            url = f"https://data.binance.com/fapi/v1/klines?symbol={symbol}&interval={interval}&limit={limit}"
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                return response.json()
+            print(f"⚠️ Fetch failed ({response.status_code}), retrying...")
         except Exception as e:
-            print(f"❌ Attempt {attempt+1}: Kline fetch error for {symbol}: {e}")
-            time.sleep(2)
+            print(f"❌ Attempt {attempt+1} error for {symbol}: {e}")
+        time.sleep(2)
     print(f"🚫 All attempts failed for {symbol}")
     return None
 
+# === ANALYSIS ===
 def analyze_symbol(symbol):
     print(f"📊 Analyzing {symbol} ...")
     data = fetch_klines(symbol)
@@ -96,15 +108,16 @@ def analyze_symbol(symbol):
     else:
         print("⚠️ No signal.")
 
+# === MAIN WORKER ===
 def run_whale_trap_worker():
-    print("✅ Whale Trap Worker started (Binance Client mode)...")
-    send_telegram_alert("✅ Whale Trap Worker started (Binance Client mode)")
+    print("✅ Whale Trap Worker started (Public Endpoint Mode)...")
+    send_telegram_alert("✅ Whale Trap Worker started (Public Endpoint Mode)")
     while True:
         for symbol in symbols:
             analyze_symbol(symbol)
-            time.sleep(29)
+            time.sleep(30)
         print("🔁 Cycle complete. Sleeping 10 minutes...")
-        time.sleep(20)
+        time.sleep(600)
 
 if __name__ == "__main__":
     run_whale_trap_worker()
