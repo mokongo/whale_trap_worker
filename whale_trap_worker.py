@@ -14,7 +14,7 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")  # Updated to full cha
 # === BINANCE API SETUP ===
 BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
 BINANCE_API_SECRET = os.getenv("BINANCE_API_SECRET")
-client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
+#client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
 def send_telegram_alert(message):
     if TELEGRAM_TOKEN and CHAT_ID:
