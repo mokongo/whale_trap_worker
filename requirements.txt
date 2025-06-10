@@ -2,6 +2,7 @@ pandas
 matplotlib
 ta
 flask
+jsonify
 python-dotenv
 streamlit
 python-telegram-bot
