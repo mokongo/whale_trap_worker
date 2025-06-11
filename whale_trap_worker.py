@@ -21,7 +21,8 @@ BINANCE_SECRET = os.getenv("BINANCE_SECRET")
 # === SYMBOL SETUP ===
 def get_perpetual_usdt_symbols():
     try:
-        url = "https://data.binance.com/api/v3/exchangeInfo"
+        #url = "https://data.binance.com/api/v3/exchangeInfo"
+        url = "https://api.binance.com/api/v3/exchangeInfo"
         headers = {
             "User-Agent": "Mozilla/5.0",
             "X-MBX-APIKEY": BINANCE_API_KEY
@@ -56,7 +57,7 @@ def fetch_klines(symbol, interval="15m", limit=100):
     retries = 3
     for attempt in range(retries):
         try:
-            url = f"https://data.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+            url = "https://api.binance.com/api/v3/exchangeInfo"/klines?symbol={symbol}&interval={interval}&limit={limit}"
             headers = {
                 "User-Agent": "Mozilla/5.0",
                 "X-MBX-APIKEY": BINANCE_API_KEY
