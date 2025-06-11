@@ -21,7 +21,7 @@ BINANCE_SECRET = os.getenv("BINANCE_SECRET")
 # === SYMBOL SETUP ===
 def get_perpetual_usdt_symbols():
     try:
-        url = "https://fapi.binance.com/fapi/v1/exchangeInfo"
+        url = "https://data.binance.com/api/v3/exchangeInfo"
         headers = {
             "User-Agent": "Mozilla/5.0",
             "X-MBX-APIKEY": BINANCE_API_KEY
@@ -31,7 +31,7 @@ def get_perpetual_usdt_symbols():
         data = response.json()
         raw_symbols = [
             s["symbol"] for s in data["symbols"]
-            if s.get("contractType") == "PERPETUAL" and s.get("quoteAsset") == "USDT"
+            if s.get("quoteAsset") == "USDT"
         ]
         filtered = [s for s in raw_symbols if re.fullmatch(r"[A-Z]{4,20}USDT", s)]
         return filtered or ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
