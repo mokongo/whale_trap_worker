@@ -14,11 +14,18 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1002760191193")
 TELEGRAM_API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
+# === BINANCE API KEYS ===
+BINANCE_API_KEY = os.getenv("BINANCE_API_KEY")
+BINANCE_SECRET = os.getenv("BINANCE_SECRET")
+
 # === SYMBOL SETUP ===
 def get_perpetual_usdt_symbols():
     try:
         url = "https://fapi.binance.com/fapi/v1/exchangeInfo"
-        headers = {"User-Agent": "Mozilla/5.0"}
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "X-MBX-APIKEY": BINANCE_API_KEY
+        }
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         data = response.json()
@@ -49,8 +56,11 @@ def fetch_klines(symbol, interval="15m", limit=100):
     retries = 3
     for attempt in range(retries):
         try:
-            url = f"https://fapi.binance.com/fapi/v1/klines?symbol={symbol}&interval={interval}&limit={limit}"
-            headers = {"User-Agent": "Mozilla/5.0"}
+            url = f"https://data.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+            headers = {
+                "User-Agent": "Mozilla/5.0",
+                "X-MBX-APIKEY": BINANCE_API_KEY
+            }
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 return response.json()
